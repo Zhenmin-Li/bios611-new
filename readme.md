@@ -8,6 +8,7 @@ Please take notice that 2020 dataset is an example because there is still 2 mont
 Preliminary Figures
 I analyze Trump’s 2016 tweets (I’m not sure to use the 2020’s above) and there’s some results.
 This is the top 20 of most used terms by Trump in 2016. 
+![Alt text](./prelimitary.png?raw=true "Title")
  
 Questions:
 What is the difference of sentiment for Trump’s tweets in 2016 and 2020?

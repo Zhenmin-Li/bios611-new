@@ -15,7 +15,7 @@ In the previous version it use a different format which contains all the trump's
 Preliminary Figures:
 
 This is the top 20 of most used terms by Trump in 2016 and 2020.
-![Alt text](./top20.png?raw=true "top20")
+![Alt text](./Top20.png?raw=true "top20")
  
 
 Questions:

@@ -281,6 +281,7 @@ grid.arrange(t1, t2, nrow=1)
 
 Then is the Wordcloud
 I used wordcloud and wordcloud2 with names removed
+The wordcloud2 has a hover effect but seems I cannot upload JS in the readme
 
 ```r
 set.seed(1234)
@@ -302,39 +303,21 @@ wordcloud(DF16_cloud$word, DF16_cloud$count, max.words = 100, scale=c(2.5,.5), r
 wordcloud2::wordcloud2(DF16_cloud[1:100,], color = "random-light", backgroundColor = "grey", shuffle=FALSE, size=0.4)
 ```
 
-![Alt text](./figure/wordcloud2.html)
+![Alt text](./figure/wordcloud2-1.png)
 
 ```r
 wordcloud(DF20_cloud$word, DF20_cloud$count, max.words = 100, scale=c(2.5,.5), random.color = TRUE, colors=brewer.pal(9,"Set1"))
 ```
 
-![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-2.png)
+![Alt text](./figure/wordcloud-2.png)
 
 ```r
 wordcloud2::wordcloud2(DF20_cloud[1:100,], color = "random-light", backgroundColor = "grey", shuffle=FALSE, size=0.4)
 ```
 
-```
-## PhantomJS not found. You can install it with webshot::install_phantomjs(). If it is installed, please make sure the phantomjs executable can be found via the PATH variable.
-```
+![Alt text](./figure/wordcloud2-2.png)
 
-```
-## Warning in normalizePath(path.expand(path), winslash, mustWork): path[1]="webshot1d587d3b30e2.png":
-## ç³»ç»æ¾ä¸å°æå®çæä»¶ã
-```
-
-```
-## Warning in file(con, "rb"): cannot open file 'C:\Users\MSI-
-## PC\AppData\Local\Temp\RtmpEf9YOn\file1d586f22264b\webshot1d587d3b30e2.png': No such file or directory
-```
-
-```
-## Error in file(con, "rb"): cannot open the connection
-```
-
-comparison in word cloud
-merge and cleaning
-
+Comparison in word cloud
 
 ```r
 all16 <- paste(tweets16$text, collapse = " ")
@@ -354,29 +337,23 @@ MatrixAll <- as.matrix(TermsAll)
 comparison.cloud(MatrixAll, colors = c("red", "green"), scale=c(2.3,.3), max.words = 75)
 ```
 
-![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png)
+![Alt text](./figure/compare.png)
 
-tidytext
-we need to break the corpus list to show bigramms
-
+Bi-grams exploration
+First we need to break the corpus to gram.
 
 ```r
 Tidy16 <- tidy(Corpus16)
-```
-
-Tidy16_1 <- tidy(Corpus16_1) without names
-
-
-```r
+Tidy16_1 <- tidy(Corpus16_1)
 Tidy20 <- tidy(Corpus20)
+Tidy20_1 <- tidy(Corpus20_1)
 ```
 
-Tidy20_1 <- tidy(Corpus20_1) without names
-bigramms
-plotBigrams <- function(tibble, topN=20, title="", color="FF1493"){
-
+Then plot it 
+I plotted 4 with and without names in different years.
 
 ```r
+plotBigrams <- function(tibble, topN=20, title="", color="FF1493"){
   x <- tibble %>% select(text) %>%
     unnest_tokens(bigram, text, token = "ngrams", n = 2)
   y <- x %>% count(bigram, sort = TRUE) %>% top_n(topN, wt=n) %>%
@@ -395,36 +372,13 @@ b4 <- plotBigrams(Tidy20_1, title="Without names 2020", color="green")
 grid.arrange(b1, b2, b3, b4, ncol=2)
 ```
 
-```
-## Error: <text>:7:1: unexpected '}'
-## 6:     theme(legend.position="none") + labs(x="", title=title)
-## 7: }
-##    ^
-```
+![Alt text](./figure/bigram.png)
 
-sentiment analysis
+## Sentiment Analysis
 
-
-```r
-get_sentiments("bing")
-```
-
-```
-## # A tibble: 6,786 x 2
-##    word        sentiment
-##    <chr>       <chr>    
-##  1 2-faces     negative 
-##  2 abnormal    negative 
-##  3 abolish     negative 
-##  4 abominable  negative 
-##  5 abominably  negative 
-##  6 abominate   negative 
-##  7 abomination negative 
-##  8 abort       negative 
-##  9 aborted     negative 
-## 10 aborts      negative 
-## # ... with 6,776 more rows
-```
+First we use bing.
+Bing is a corpus with words labeled positive and negative.
+This will show the histogram of top positive and negative words.
 
 ```r
 DocMeta16_1 <- meta(Corpus16_1)
@@ -458,10 +412,10 @@ b2 <- Bing %>% count(word, sentiment, sort=TRUE) %>%
 grid.arrange(b1, b2)
 ```
 
-![plot of chunk unnamed-chunk-18](figure/unnamed-chunk-18-1.png)
+![Alt text](./figure/topbing.png)
 
-time series
-
+Then we plot the sentiment of the twitter in time series.
+You may notice some lines are not connected and there is a obvious long line in latter half of sentiment 2020, this is because lack of data.
 
 ```r
 t1 <- Bing %>% group_by(date) %>% count(sentiment) %>%
@@ -479,55 +433,11 @@ t2 <- Bing %>% group_by(date) %>% count(sentiment) %>%
 grid.arrange(t1, t2, ncol=1)
 ```
 
-```
-## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-```
+![Alt text](./figure/timebing.png)
 
-```
-## Warning: Removed 77 rows containing non-finite values (stat_smooth).
-```
-
-```
-## Warning: Removed 63 row(s) containing missing values (geom_path).
-```
-
-```
-## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-```
-
-```
-## Warning: Removed 95 rows containing non-finite values (stat_smooth).
-```
-
-```
-## Warning: Removed 89 row(s) containing missing values (geom_path).
-```
-
-![plot of chunk unnamed-chunk-19](figure/unnamed-chunk-19-1.png)
-
-sentiment analysis afinn
-
-
-```r
-get_sentiments("afinn")
-```
-
-```
-## # A tibble: 2,477 x 2
-##    word       value
-##    <chr>      <dbl>
-##  1 abandon       -2
-##  2 abandoned     -2
-##  3 abandons      -2
-##  4 abducted      -2
-##  5 abduction     -2
-##  6 abductions    -2
-##  7 abhor         -3
-##  8 abhorred      -3
-##  9 abhorrent     -3
-## 10 abhors        -3
-## # ... with 2,467 more rows
-```
+Then we use afinn.
+Afinn is similar to bing but use positive and negative score.
+The image has defection same to bing.
 
 ```r
 Afinn <- Words %>% inner_join(get_sentiments("afinn"), by="word")
@@ -538,74 +448,19 @@ a1 <- Afinn %>%  group_by(date) %>% summarise(value=sum(value)) %>%
   geom_line(stat="identity", col="blue") + geom_smooth(col="red") + labs(title="Sentiment 2016")
 ```
 
-```
-## `summarise()` ungrouping output (override with `.groups` argument)
-```
-
 ```r
 a2 <- Afinn %>% group_by(date) %>% summarise(value=sum(value)) %>%
   ggplot(aes(x=date, y=value)) +
   scale_x_date(limits=c(as.Date("2020-07-18"), as.Date("2020-10-07")), date_breaks = "1 month", date_labels = "%b") +
   geom_line(stat="identity", col="blue") + geom_smooth(col="red") + labs(title="Sentiment 2018")
-```
 
-```
-## `summarise()` ungrouping output (override with `.groups` argument)
-```
-
-```r
 grid.arrange(a1, a2)
 ```
 
-```
-## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-```
+![Alt text](./figure/timeafinn.png)
 
-```
-## Warning: Removed 62 rows containing non-finite values (stat_smooth).
-```
-
-```
-## Warning: Removed 62 row(s) containing missing values (geom_path).
-```
-
-```
-## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-```
-
-```
-## Warning: Removed 89 rows containing non-finite values (stat_smooth).
-```
-
-```
-## Warning: Removed 89 row(s) containing missing values (geom_path).
-```
-
-![plot of chunk unnamed-chunk-20](figure/unnamed-chunk-20-1.png)
-
-sentiment nrc
-
-
-```r
-get_sentiments("nrc")
-```
-
-```
-## # A tibble: 13,901 x 2
-##    word        sentiment
-##    <chr>       <chr>    
-##  1 abacus      trust    
-##  2 abandon     fear     
-##  3 abandon     negative 
-##  4 abandon     sadness  
-##  5 abandoned   anger    
-##  6 abandoned   fear     
-##  7 abandoned   negative 
-##  8 abandoned   sadness  
-##  9 abandonment anger    
-## 10 abandonment fear     
-## # ... with 13,891 more rows
-```
+Then we use nrc.
+Nrc labeled the sentiment words will different kinds of sentiment
 
 ```r
 Nrc <- Words %>% inner_join(get_sentiments("nrc"), by="word")
@@ -624,5 +479,9 @@ n2 <- Nrc %>% filter(date > "2017-02-04") %>% count(sentiment) %>%
   labs(x="", y="", title="2020")
 grid.arrange(n1, n2, nrow=1)
 ```
+![Alt text](./figure/nrc.png)
 
-![plot of chunk unnamed-chunk-21](figure/unnamed-chunk-21-1.png)
+
+# Conclusions
+
+Unlike the impression of public, Trump's tweets most time stays neutral.

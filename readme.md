@@ -484,4 +484,14 @@ grid.arrange(n1, n2, nrow=1)
 
 # Conclusions
 
-Unlike the impression of public, Trump's tweets most time stays neutral.
+In 2016 Hillary Clinton appears in Trump's tweets far more than other words. In 2020 it seems Biden didn't got enough attention as Hillary. His top focus now is fake news.
+
+Trump's tweets most times stays neutral. In 2016 his attitude may be more positive because "crooked", which he use to describe Hillary, take accounts some of the negative sentiments.
+
+It seems there's an important date in near August 12 which makes his attitude positive, but I cannot figure it out. I will inspect the text that day later.
+
+Despite many hard times in 2020, it seems Trump's feeling is not greatly impacted.
+
+# Suggestions for Further Analysis
+
+An obvious defect is that 3 month's tweets are not enough. I cannot get the tweets because I don't know how to use Twitter's API in R. (I only use it before in Python). I think expand the data scale to 1 year may help identify more findings.

@@ -1,10 +1,8 @@
 # Sentiment Analysis of Trump's Tweets before election
 
-#Introduction
-
 2020 US presidential election is one of the impactful events in the world. And whether the current president, Donald Trump, will win the election and still serve as US president is hard to predict. In this case it is important to know his attitude toward the 2020 election. I want to do some sentiment analysis on Donald Trump’s tweets during 2016 and 2020 election and see if there’s any changes.
 
-##Description of dataset:
+## Description of dataset:
 
 For this project, I will use Donald Trump’s tweets in the year of 2020 and 2016 before election. I will only use two properties: content of the tweets for data mining and date for filter. I will probably use Twitter API to get more data if I need some other properties (e.g. who will be retweeted by Trump).
 
@@ -14,9 +12,9 @@ This dataset has 20 versions till now. The latest version contains tweets from 7
 In the previous version it use a different format which contains all the trump's tweets from 2019. So I can get the data in 2016. It seems Kaggle doesn't provide it anymore (1 month before it can be downloaded) but you can get it in the "source_data" folder.
 
 
-#Data Exploration
+# Data Exploration
 
-##Some Pre-work
+## Some Pre-work
 
 First load in the package we will use
 
@@ -159,7 +157,7 @@ kable(head(tweets20 %>% select(text), 20), format = "html") %>%
 </table>
 
 
-##Data Cleaning
+## Data Cleaning
 
 clean the line end, amp, url and icon
 
@@ -207,7 +205,7 @@ CleanCorpus <- function(x){
 }
 ```
 
-remove the name of candidates, otherwise it is too large in wordcloud
+remove the name of candidates, otherwise these names will have the top frequency
 "sleepy" is also removed because of "sleepy joe"
 
 
@@ -255,7 +253,7 @@ content(Corpus20[[1]])
 ## [1] " united effort defeat invisible china virus people patriotic wear "
 ```
 
-##Preliminary Figures
+## Preliminary Figures
 
 top 20 words histogram
 
@@ -281,8 +279,8 @@ grid.arrange(t1, t2, nrow=1)
 
 ![Alt text](./figure/top20.png)
 
-word cloud remove name
-
+Then is the Wordcloud
+I used wordcloud and wordcloud2 with names removed
 
 ```r
 set.seed(1234)
@@ -298,29 +296,13 @@ DF20_cloud <- data.frame(word=names(TermFreq20), count=TermFreq20)
 wordcloud(DF16_cloud$word, DF16_cloud$count, max.words = 100, scale=c(2.5,.5), random.color = TRUE, colors=brewer.pal(9,"Set1"))
 ```
 
-![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png)
+![Alt text](./figure/wordcloud-1.png)
 
 ```r
 wordcloud2::wordcloud2(DF16_cloud[1:100,], color = "random-light", backgroundColor = "grey", shuffle=FALSE, size=0.4)
 ```
 
-```
-## PhantomJS not found. You can install it with webshot::install_phantomjs(). If it is installed, please make sure the phantomjs executable can be found via the PATH variable.
-```
-
-```
-## Warning in normalizePath(path.expand(path), winslash, mustWork): path[1]="webshot1d584ed61cf7.png":
-## ç³»ç»æ¾ä¸å°æå®çæä»¶ã
-```
-
-```
-## Warning in file(con, "rb"): cannot open file 'C:\Users\MSI-
-## PC\AppData\Local\Temp\RtmpEf9YOn\file1d58612512c0\webshot1d584ed61cf7.png': No such file or directory
-```
-
-```
-## Error in file(con, "rb"): cannot open the connection
-```
+![Alt text](./figure/wordcloud2.html)
 
 ```r
 wordcloud(DF20_cloud$word, DF20_cloud$count, max.words = 100, scale=c(2.5,.5), random.color = TRUE, colors=brewer.pal(9,"Set1"))

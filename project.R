@@ -1,7 +1,8 @@
 #Some defection
 
 
-
+library(webshot)
+library(htmlwidgets)
 library(knitr)
 library(tidyr)
 library(dplyr)
@@ -21,15 +22,17 @@ library(wordcloud2)
 library(tidytext)
 library(textdata)
 library(broom)
-library(topicmodels)
+#library(topicmodels)
 library(bit64)
 
+webshot::install_phantomjs()
 #Load the data
-#setwd("C:\\Users\\MSI-PC\\OneDrive\\course\\bios 611\\project")
+#setwd("C:\\Users\\lzm11\\OneDrive\\course\\bios611\\bios611_course_project")
 
-tweets16 <- timetk::tk_tbl(data.table::fread("ttweets1.csv", encoding= "UTF-8"))
-tweets20 <- timetk::tk_tbl(data.table::fread("ttweets2.csv", encoding= "UTF-8"))
+tweets16 <- timetk::tk_tbl(data.table::fread("source_data/ttweets1.csv", encoding= "UTF-8"))
+tweets20 <- timetk::tk_tbl(data.table::fread("source_data/ttweets2.csv", encoding= "UTF-8"))
 
+print("read complete")
 #date formatting and cleaning
 #I only need tweets from  07.18 to 10.17 in 2016 data
 tweets16$date <- mdy_hm(tweets16$date)
@@ -40,16 +43,16 @@ glimpse(tweets16)
 
 #text mining section
 
-#show the content of text
-kable(head(tweets16 %>% select(text), 20), format = "html") %>%
-  kable_styling() %>%
-  column_spec(1, width = "19cm")
+print("show the content of text")
+#kable(head(tweets16 %>% select(text), 20), format = "html") %>%
+  #kable_styling() %>%
+  #column_spec(1, width = "19cm")
 
-kable(head(tweets20 %>% select(text), 20), format = "html") %>%
-  kable_styling() %>%
-  column_spec(1, width = "19cm")
+#kable(head(tweets20 %>% select(text), 20), format = "html") %>%
+  #kable_styling() %>%
+  #column_spec(1, width = "19cm")
 
-#clean the line end, amp, url and icon
+print("clean the line end, amp, url and icon")
 tweets16$text <- str_replace_all(tweets16$text, "[\n]" , "") 
 tweets16$text <- str_replace_all(tweets16$text, "&amp", "") 
 tweets16$text <- str_replace_all(tweets16$text, "http.*" , "")
@@ -116,6 +119,9 @@ TermFreq20 <- CreateTermsMatrix(Corpus20)
 content(Corpus16[[1]])
 content(Corpus20[[1]])
 
+#create directory for figures
+dir.create("./figures/",showWarnings=FALSE);
+
 #top 20 words histogram
 DF16_top20 <- data.frame(word=names(TermFreq16), count=TermFreq16)
 
@@ -133,7 +139,8 @@ t2 <- DF20_top20[1:20,] %>%
   geom_bar(stat='identity', fill="green") + coord_flip() + theme(legend.position = "none") +
   labs(x="")
 
-grid.arrange(t1, t2, nrow=1)
+g <- grid.arrange(t1, t2, nrow=1)
+ggsave("./figures/top20.png", g)
 
 #word cloud remove name
 set.seed(1234)
@@ -146,29 +153,12 @@ Corpus20_1 <- RemoveNames(Corpus20)
 TermFreq20 <- CreateTermsMatrix(Corpus20_1)
 DF20_cloud <- data.frame(word=names(TermFreq20), count=TermFreq20)
 
-wordcloud(DF16_cloud$word, DF16_cloud$count, max.words = 100, scale=c(2.5,.5), random.color = TRUE, colors=brewer.pal(9,"Set1"))
-wordcloud2::wordcloud2(DF16_cloud[1:100,], color = "random-light", backgroundColor = "grey", shuffle=FALSE, size=0.4)
-
-wordcloud(DF20_cloud$word, DF20_cloud$count, max.words = 100, scale=c(2.5,.5), random.color = TRUE, colors=brewer.pal(9,"Set1"))
-wordcloud2::wordcloud2(DF20_cloud[1:100,], color = "random-light", backgroundColor = "grey", shuffle=FALSE, size=0.4)
-
-#comparison in word cloud
-#merge and cleaning
-all16 <- paste(tweets16$text, collapse = " ")
-all20 <- paste(tweets20$text, collapse = " ")
-all1620 <- c(all16, all20)
-
-
-all1620 <- VectorSource(all1620)
-allCorpus <- VCorpus(all1620)
-allCorpus <- CleanCorpus(allCorpus)
-allCorpus <- RemoveNames(allCorpus)
-
-TermsAll <- TermDocumentMatrix(allCorpus)
-colnames(TermsAll) <- c("16", "20")
-MatrixAll <- as.matrix(TermsAll)
-
-comparison.cloud(MatrixAll, colors = c("red", "green"), scale=c(2.3,.3), max.words = 75)
+w1 <- wordcloud2::wordcloud2(DF16_cloud[1:100,], color = "random-light", backgroundColor = "white", shuffle=FALSE, size=0.4)
+withr::with_dir('figures', saveWidget(w1, file="tmp.html",selfcontained=FALSE))
+webshot("./figures/tmp.html","./figures/wordcloud1.png", delay =5, vwidth = 480, vheight=480)
+w2 <- wordcloud2::wordcloud2(DF20_cloud[1:100,], color = "random-light", backgroundColor = "white", shuffle=FALSE, size=0.4)
+withr::with_dir('figures', saveWidget(w1, file="tmp.html",selfcontained=FALSE))
+webshot("./figures/tmp.html","./figures/wordcloud2.png", delay =5, vwidth = 480, vheight=480)
 
 #tidytext
 #we need to break the corpus list to show bigramms
@@ -194,7 +184,8 @@ b2 <- plotBigrams(Tidy16_1, title="Without names 2016", color="red")
 b3 <- plotBigrams(Tidy20, title="With names 2020", color="green")
 b4 <- plotBigrams(Tidy20_1, title="Without names 2020", color="green")
 
-grid.arrange(b1, b2, b3, b4, ncol=2)
+g <- grid.arrange(b1, b2, b3, b4, ncol=2)
+ggsave("./figures/bigramms.png", g, width = 800/72, height = 600/72, dpi = 150)
 
 #sentiment analysis
 get_sentiments("bing")
@@ -227,12 +218,11 @@ b2 <- Bing %>% count(word, sentiment, sort=TRUE) %>%
   facet_wrap(~sentiment, scales="free_y") +
   labs(x="", y="number of times used", title="Donald Trump's most used words in 2020") +
   scale_fill_manual(values = c("positive"="green", "negative"="red"))
-grid.arrange(b1, b2)
 
+g <- grid.arrange(b1, b2)
+ggsave("./figures/mostused.png", g, width = 800/72, height = 600/72, dpi = 150)
 
 #time series
-
-
 t1 <- Bing %>% group_by(date) %>% count(sentiment) %>%
   spread(sentiment, n) %>% mutate(score=positive-negative) %>%
   ggplot(aes(x=date, y=score)) +
@@ -245,8 +235,8 @@ t2 <- Bing %>% group_by(date) %>% count(sentiment) %>%
   scale_x_date(limits=c(as.Date("2020-07-18"), as.Date("2020-10-07")), date_breaks = "1 month", date_labels = "%b") +
   geom_line(stat="identity", col="blue") + geom_smooth(col="red") + labs(title="Sentiment 2020")
 
-grid.arrange(t1, t2, ncol=1)
-
+g <- grid.arrange(t1, t2, ncol=1)
+ggsave("./figures/time_bing.png", g, width = 800/72, height = 600/72, dpi = 150)
 
 #sentiment analysis afinn
 get_sentiments("afinn")
@@ -263,8 +253,8 @@ a2 <- Afinn %>% group_by(date) %>% summarise(value=sum(value)) %>%
   scale_x_date(limits=c(as.Date("2020-07-18"), as.Date("2020-10-07")), date_breaks = "1 month", date_labels = "%b") +
   geom_line(stat="identity", col="blue") + geom_smooth(col="red") + labs(title="Sentiment 2018")
 
-grid.arrange(a1, a2)
-
+g <- grid.arrange(a1, a2)
+ggsave("./figures/time_affin.png", g, width = 800/72, height = 600/72, dpi = 150)
 
 #sentiment nrc
 get_sentiments("nrc")
@@ -283,6 +273,7 @@ n2 <- Nrc %>% filter(date > "2017-02-04") %>% count(sentiment) %>%
   theme(legend.position = "none", axis.text.x = element_blank()) +
   geom_text(aes(label=sentiment, y=500)) +
   labs(x="", y="", title="2020")
-grid.arrange(n1, n2, nrow=1)
+g <- grid.arrange(n1, n2, nrow=1)
+ggsave("./figures/nrc.png", g, width = 800/72, height = 600/72, dpi = 150)
 
 
